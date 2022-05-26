@@ -38,17 +38,17 @@ async function run() {
         const reviewCollection = client.db('tools-manufacturer').collection('reviews');
         const profileCollection = client.db('tools-manufacturer').collection('profiles');
 
-        const verifyAdmin = async (req, res, next) => {
+        // const verifyAdmin = async (req, res, next) => {
 
-            const requester = req.decoded.email;
-            const requesterAccount = await userCollection.findOne({ email: requester });
-            if (requesterAccount.role === 'admin') {
-                next();
-            }
-            else {
-                return res.status(403).send({ message: 'forbidden access' })
-            }
-        }
+        //     const requester = req.decoded.email;
+        //     const requesterAccount = await userCollection.findOne({ email: requester });
+        //     if (requesterAccount.role === 'admin') {
+        //         next();
+        //     }
+        //     else {
+        //         return res.status(403).send({ message: 'forbidden access' })
+        //     }
+        // }
 
         //ITEMS API 
         app.get('/item', async (req, res) => {
@@ -84,7 +84,7 @@ async function run() {
 
         });
 
-        app.get('/user', async (req, res) => {
+        app.get('/user', verifyJWT, async (req, res) => {
             const users = await userCollection.find().toArray();
             res.send(users);
         });
@@ -110,9 +110,18 @@ async function run() {
 
         // });
 
-        app.get('/booking', async (req, res) => {
-            const cursor = await bookingCollection.find({}).toArray()
-            res.send(cursor)
+        app.get('/booking', verifyJWT, async (req, res) => {
+            const email = req.query.email;
+            const decodedEmail = req.decoded.email;
+            if (email === decodedEmail) {
+                const query = { email: email };
+                const bookings = await bookingCollection.find(query).toArray()
+                res.send(bookings)
+            }
+            else {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
+
         });
 
         app.post('/booking', async (req, res) => {
@@ -134,11 +143,11 @@ async function run() {
 
         });
 
-        app.put('/user/admin/:email', verifyJWT, verifyAdmin, async (req, res) => {
+        app.put('/user/admin/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
-            // const requester = req.decoded.email;
-            // const requesterAccount = await userCollection.findOne({ email: requester });
-            // if (requesterAccount.role === 'admin') {
+            const requester = req.decoded.email;
+            const requesterAccount = await userCollection.findOne({ email: requester });
+            if (requesterAccount.role === 'admin') {
             const filter = { email: email };
             const updateDoc = {
                 $set: { role: 'admin' },
@@ -146,8 +155,14 @@ async function run() {
             const result = await userCollection.updateOne(filter, updateDoc);
 
             res.send(result);
-            // }
+            }
         });
+
+        // app.get('/user', async (req, res) => {
+        //     const users = await userCollection.find().toArray();
+        //     res.send(users);
+        // });
+
 
         app.put('/user/:email', async (req, res) => {
             const email = req.params.email;
@@ -163,19 +178,19 @@ async function run() {
         });
 
 
-        app.get('/product', verifyJWT, verifyAdmin, async (req, res) => {
+        app.get('/product', verifyJWT, async (req, res) => {
             const products = await productCollection.find().toArray();
             res.send(products);
         });
 
 
-        app.post('/product', verifyJWT, verifyAdmin, async (req, res) => {
+        app.post('/product', verifyJWT, async (req, res) => {
             const product = req.body;
             const result = await productCollection.insertOne(product);
             res.send(result);
         });
 
-        app.delete('/product/:email', verifyJWT, verifyAdmin, async (req, res) => {
+        app.delete('/product/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
             const filter = { email: email };
             const result = await productCollection.deleteOne(filter);
