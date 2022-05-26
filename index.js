@@ -104,20 +104,6 @@ async function run() {
             res.send(users);
         });
 
-  
-        // app.get('/booking', verifyJWT, async (req, res) => {
-        //     const buyer = req.query.buyer;
-        //     const decodedEmail = req.decoded.email;
-        //     if (buyer === decodedEmail) {
-        //         const query = { buyer: buyer };
-        //         const bookings = await bookingCollection.find(query).toArray();
-        //         return res.send(bookings);
-        //     }
-        //     else {
-        //         return res.status(403).send({ message: 'forbidden access' })
-        //     }
-
-        // });
 
         app.get('/booking', verifyJWT, async (req, res) => {
             const email = req.query.email;
@@ -172,8 +158,6 @@ async function run() {
                 return res.status(403).send({ message: 'forbidden access' })
             }
         });
-
-
 
         app.put('/user/:email', async (req, res) => {
             const email = req.params.email;
