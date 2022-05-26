@@ -7,6 +7,8 @@ const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
+//middleware
+
 app.use(cors());
 app.use(express.json());
 
@@ -171,10 +173,6 @@ async function run() {
             }
         });
 
-        // app.get('/user', async (req, res) => {
-        //     const users = await userCollection.find().toArray();
-        //     res.send(users);
-        // });
 
 
         app.put('/user/:email', async (req, res) => {
