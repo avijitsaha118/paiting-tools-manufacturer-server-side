@@ -36,6 +36,7 @@ async function run() {
         const userCollection = client.db('tools-manufacturer').collection('users');
         const productCollection = client.db('tools-manufacturer').collection('products');
         const reviewCollection = client.db('tools-manufacturer').collection('reviews');
+        const profileCollection = client.db('tools-manufacturer').collection('profiles');
 
         const verifyAdmin = async (req, res, next) => {
 
@@ -95,29 +96,34 @@ async function run() {
         //     res.send({ admin: isAdmin });
         // })
 
-        app.get('/booking', verifyJWT, async (req, res) => {
-            const buyer = req.query.buyer;
-            const decodedEmail = req.decoded.email;
-            if (buyer === decodedEmail) {
-                const query = { buyer: buyer };
-                const bookings = await bookingCollection.find(query).toArray();
-                return res.send(bookings);
-            }
-            else {
-                return res.status(403).send({ message: 'forbidden access' })
-            }
+        // app.get('/booking', verifyJWT, async (req, res) => {
+        //     const buyer = req.query.buyer;
+        //     const decodedEmail = req.decoded.email;
+        //     if (buyer === decodedEmail) {
+        //         const query = { buyer: buyer };
+        //         const bookings = await bookingCollection.find(query).toArray();
+        //         return res.send(bookings);
+        //     }
+        //     else {
+        //         return res.status(403).send({ message: 'forbidden access' })
+        //     }
 
+        // });
+
+        app.get('/booking', async (req, res) => {
+            const cursor = await bookingCollection.find({}).toArray()
+            res.send(cursor)
         });
 
         app.post('/booking', async (req, res) => {
             const booking = req.body;
-            const query = { toolName: booking.toolName, buyer: booking.buyer }
-            const exists = await bookingCollection.findOne(query);
-            if (exists) {
-                return res.send({ success: false, booking: exists })
-            }
+            // const query = { toolName: booking.toolName, buyer: booking.buyer }
+            // const exists = await bookingCollection.findOne(query);
+            // if (exists) {
+            //     return res.send({ success: false, booking: exists })
+            // }
             const result = await bookingCollection.insertOne(booking);
-            return res.send({ success: true, result });
+            res.send(result);
         });
 
         app.get('/booking/:id', async (req, res) => {
@@ -176,12 +182,12 @@ async function run() {
             res.send(result);
         });
 
-      
+
         //review api
 
         app.get('/myreview', async (req, res) => {
             // const email = req.query.email;
-            const query = { };
+            const query = {};
             const cursor = reviewCollection.find(query);
             const myReviews = await cursor.toArray();
             res.send(myReviews);
@@ -194,8 +200,44 @@ async function run() {
             res.send(result);
         });
 
+        app.get('/myprofile', async (req, res) => {
+            // const email = req.query.email;
+            const query = {};
+            const cursor = profileCollection.find(query);
+            const myProfiles = await cursor.toArray();
+            res.send(myProfiles);
+
+        });
+
+        app.post('/myprofile', async (req, res) => {
+            const profile = req.body;
+            const result = await profileCollection.insertOne(profile);
+            res.send(result);
+        });
+
+        app.put('/myprofile/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedUser = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    name: updatedUser.name,
+                    email: updatedUser.email,
+                    education: updatedUser.education,
+                    location: updatedUser.location,
+                    phone: updatedUser.phone,
+                    linkedin: updatedUser.linkedin,
+                    img: updatedUser.img
+                }
+            };
+            const result = await profileCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+
+        })
+
     }
-    
+
     finally {
 
     }
