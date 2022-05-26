@@ -53,19 +53,6 @@ async function run() {
             res.send({ clientSecret: paymentIntent.client_secret });
         })
 
-        // const verifyAdmin = async (req, res, next) => {
-
-        //     const requester = req.decoded.email;
-        //     const requesterAccount = await userCollection.findOne({ email: requester });
-        //     if (requesterAccount.role === 'admin') {
-        //         next();
-        //     }
-        //     else {
-        //         return res.status(403).send({ message: 'forbidden access' })
-        //     }
-        // }
-
-        //ITEMS API 
         app.get('/item', async (req, res) => {
             const query = {};
             const cursor = itemCollection.find(query);
