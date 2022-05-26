@@ -81,8 +81,6 @@ async function run() {
             res.send(result);
         });
 
-        //updated quantity
-
 
         app.put('/item/:id', async (req, res) => {
             const id = req.params.id;
@@ -135,11 +133,6 @@ async function run() {
 
         app.post('/booking', async (req, res) => {
             const booking = req.body;
-            // const query = { toolName: booking.toolName, buyer: booking.buyer }
-            // const exists = await bookingCollection.findOne(query);
-            // if (exists) {
-            //     return res.send({ success: false, booking: exists })
-            // }
             const result = await bookingCollection.insertOne(booking);
             res.send(result);
         });
@@ -286,7 +279,7 @@ async function run() {
             const result = await profileCollection.updateOne(filter, updatedDoc, options);
             res.send(result);
 
-        })
+        });
 
     }
 
